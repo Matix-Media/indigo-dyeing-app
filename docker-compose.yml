@@ -1,0 +1,58 @@
+services:
+    db:
+        image: postgres:16-alpine
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ${DB_NAME:-indigo_dyeing}
+            POSTGRES_USER: ${DB_USER:-postgres}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    backend:
+        build:
+            context: ./backend
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        environment:
+            NODE_ENV: production
+            PORT: 3000
+            FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_USER: ${DB_USER:-postgres}
+            DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+            DB_NAME: ${DB_NAME:-indigo_dyeing}
+            JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+            STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY is required}
+            STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+        depends_on:
+            db:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+
+    frontend:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+            args:
+                VITE_API_URL: /api
+                VITE_STRIPE_PUBLIC_KEY: ${VITE_STRIPE_PUBLIC_KEY:?VITE_STRIPE_PUBLIC_KEY is required}
+        restart: unless-stopped
+        ports:
+            - "80:80"
+        depends_on:
+            - backend
+
+volumes:
+    postgres_data:
