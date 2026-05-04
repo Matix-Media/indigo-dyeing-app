@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indigo Alive — App Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --indigo: #1a2f5e;
+  --indigo-mid: #2d4a8a;
+  --indigo-light: #4a72c4;
+  --indigo-pale: #e8eef8;
+  --indigo-wash: #f0f4fb;
+  --white: #ffffff;
+  --ink: #111827;
+  --muted: #6b7280;
+  --border: #d1d9ef;
+  --green: #1d9e75;
+  --amber: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #070c18;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -150px; left: -150px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(74,114,196,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.top-label { text-align: center; margin-bottom: 1.5rem; }
+.top-label h1 { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 1.8rem; color: #fff; margin-bottom: 3px; }
+.top-label p { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+.step-nav { display: flex; gap: 6px; margin-bottom: 1.25rem; justify-content: center; flex-wrap: wrap; }
+.step-dot {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08);
+  cursor: pointer; transition: all 0.2s; font-size: 11px; color: rgba(255,255,255,0.3);
+}
+.step-dot:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+.step-dot.active { background: var(--indigo); border-color: var(--indigo-light); color: #fff; }
+
+/* PHONE */
+.phone-frame {
+  width: 390px; height: 844px;
+  background: #0d0d0d;
+  border-radius: 54px;
+  padding: 12px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(74,114,196,0.08);
+  position: relative;
+}
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 126px; height: 37px;
+  background: #0d0d0d;
+  border-radius: 0 0 22px 22px;
+  z-index: 200;
+}
+.phone-inner {
+  width: 100%; height: 100%;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  background: var(--indigo-wash);
+}
+
+/* SCREENS */
+.screen {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none; flex-direction: column;
+  overflow: hidden;
+  background: var(--white);
+}
+.screen.active { display: flex; animation: sIn 0.28s ease; }
+@keyframes sIn { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
+@keyframes sBack { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:translateX(0); } }
+
+/* STATUS BAR */
+.sb {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 48px 24px 8px; flex-shrink: 0; z-index: 10;
+}
+.sb-time { font-size: 15px; font-weight: 600; }
+.sb-icons { display: flex; gap: 5px; align-items: center; }
+
+/* NAV BAR */
+.nb {
+  display: flex; align-items: center; padding: 8px 20px 10px;
+  flex-shrink: 0; gap: 8px;
+}
+.nb-back {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--indigo-pale); color: var(--indigo);
+  border: none; font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-family: inherit;
+}
+.nb-title { flex: 1; text-align: center; font-size: 15px; font-weight: 500; color: var(--ink); }
+.nb-space { width: 34px; }
+
+/* SCROLL AREA */
+.scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.scroll::-webkit-scrollbar { display: none; }
+
+/* HOME INDICATOR */
+.hi { height: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hi-bar { width: 120px; height: 4px; border-radius: 4px; }
+
+/* COMMON ELEMENTS */
+.btn {
+  width: 100%; padding: 15px;
+  border-radius: 14px; font-size: 15px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: all 0.18s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: none;
+}
+.btn-dark { background: var(--indigo); color: #fff; }
+.btn-dark:hover { background: var(--indigo-mid); }
+.btn-dark:active { transform: scale(0.98); }
+.btn-white-solid { background: #fff; color: var(--indigo); }
+.btn-white-solid:hover { background: rgba(255,255,255,0.9); }
+.btn-outline { background: transparent; color: rgba(255,255,255,0.8); border: 1.5px solid rgba(255,255,255,0.22); }
+.btn-outline:hover { border-color: rgba(255,255,255,0.45); color: #fff; }
+
+.card { background: var(--white); border-radius: 16px; padding: 16px; }
+.sec-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+.divider { height: 0.5px; background: var(--border); margin: 12px 0; }
+
+/* SVG icons */
+.ico-signal { display:inline-block; }
+.ico-bat { display:inline-block; }
+
+/* ========================
+   SCREEN 1 — WELCOME
+   ======================== */
+#s1 { background: var(--indigo); }
+.s1-bg {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+}
+.s1-bg-circle1 {
+  position: absolute; top: -80px; right: -80px;
+  width: 340px; height: 340px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(74,114,196,0.25) 0%, transparent 65%);
+}
+.s1-bg-circle2 {
+  position: absolute; bottom: -60px; left: -60px;
+  width: 280px; height: 280px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 65%);
+}
+.s1-sb { background: transparent; padding-top: 52px; }
+.s1-lang {
+  position: absolute; top: 108px; right: 22px; z-index: 20;
+  font-size: 11px; background: rgba(255,255,255,0.1);
+  border: 0.5px solid rgba(255,255,255,0.15); border-radius: 20px;
+  padding: 4px 12px; cursor: pointer; display: flex; gap: 6px; align-items: center;
+}
+.s1-lang-opt { color: rgba(255,255,255,0.45); transition: color 0.15s; }
+.s1-lang-opt.active { color: #fff; font-weight: 500; }
+.s1-lang-sep { color: rgba(255,255,255,0.2); }
+.s1-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 1.5rem 2rem;
+  position: relative; z-index: 5;
+}
+.s1-pat-wrap { width: 130px; height: 130px; margin-bottom: 1.75rem; opacity: 0.12; }
+.s1-wordmark {
+  font-family: 'DM Serif Display', serif; font-style: italic;
+  font-size: 44px; color: #fff; line-height: 1; margin-bottom: 14px; text-align: center;
+}
+.s1-three {
+  display: flex; gap: 0; margin-bottom: 2.25rem;
+}
+.s1-three-item {
+  font-size: 13px; color: rgba(255,255,255,0.55); text-align: center;
+}
+.s1-three-item strong { display: block; font-size: 16px; color: #fff; font-weight: 500; margin-bottom: 1px; }
+.s1-three-sep { color: rgba(255,255,255,0.2); font-size: 22px; margin: 0 14px; line-height: 1.6; }
+.s1-footer { padding: 0 1.75rem 2rem; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 5; }
+
+/* ========================
+   SCREEN 6 — CRAFT INFO
+   ======================== */
+#s6 { background: var(--white); }
+.s6-hero {
+  height: 200px; flex-shrink: 0; background: var(--indigo);
+  display: flex; align-items: flex-end; padding: 20px;
+  position: relative; overflow: hidden;
+}
+.s6-hero-bg { position: absolute; inset: 0; opacity: 0.12; display: flex; align-items: center; justify-content: center; }
+.s6-hero-title { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 26px; color: #fff; position: relative; z-index: 2; line-height: 1.2; }
+.s6-scroll { padding: 20px; }
+.s6-section { margin-bottom: 20px; }
+.s6-section h3 { font-size: 14px; font-weight: 600; color: var(--indigo); margin-bottom: 8px; }
+.s6-section p { font-size: 13px; color: #374151; line-height: 1.7; }
+.s6-timeline { display: flex; flex-direction: column; gap: 12px; }
+.s6-tl-item { display: flex; gap: 12px; align-items: flex-start; }
+.s6-tl-year { font-size: 12px; font-weight: 600; color: var(--indigo); min-width: 40px; padding-top: 1px; }
+.s6-tl-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.s6-tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.s6-tag { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: var(--indigo-pale); color: var(--indigo); }
+
+/* ========================
+   SCREEN 2 — PATTERN PICKER
+   ======================== */
+#s2 { background: var(--indigo-wash); }
+.s2-preview-wrap {
+  margin: 0 20px 14px; border-radius: 20px;
+  background: var(--indigo); overflow: hidden;
+  height: 200px; flex-shrink: 0; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.s2-svg-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.s2-bottom-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(10,18,40,0.85));
+  padding: 28px 16px 14px; text-align: center;
+}
+.s2-bottom-label h4 { font-size: 14px; font-weight: 500; color: #fff; margin-bottom: 5px; }
+.badge { display: inline-block; font-size: 10px; padding: 2px 9px; border-radius: 20px; }
+.badge-easy { background: var(--green); color: #fff; }
+.badge-med { background: var(--amber); color: #fff; }
+.badge-hard { background: #9a3412; color: #fff; }
+
+.s2-thumbs-wrap { padding: 0 20px 6px; flex-shrink: 0; }
+.s2-thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 20px; }
+.s2-thumbs::-webkit-scrollbar { display: none; }
+.s2-thumb-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.s2-thumb {
+  width: 58px; height: 58px; border-radius: 14px;
+  background: var(--indigo); border: 2px solid transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s;
+}
+.s2-thumb.sel { border-color: var(--indigo-light); }
+.s2-thumb-name { font-size: 9px; color: var(--muted); white-space: nowrap; }
+
+.s2-sliders-wrap { padding: 0 20px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; }
+.sl-row { display: flex; flex-direction: column; gap: 8px; }
+.sl-header { display: flex; justify-content: space-between; font-size: 13px; }
+.sl-header span:first-child { font-weight: 500; color: var(--ink); }
+.sl-header span:last-child { color: var(--indigo-light); font-weight: 500; font-size: 12px; }
+.sl-track {
+  height: 4px; background: var(--border); border-radius: 4px;
+  position: relative; cursor: pointer;
+}
+.sl-fill { height: 100%; border-radius: 4px; background: var(--indigo-light); pointer-events: none; }
+.sl-handle {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--indigo); border: 2.5px solid #fff;
+  position: absolute; top: 50%; transform: translateY(-50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  pointer-events: none;
+}
+.s2-book-wrap { padding: 14px 20px 14px; flex-shrink: 0; }
+
+/* ========================
+   SCREEN 3 — ARTISAN
+   ======================== */
+#s3 { background: var(--white); }
+.s3-hero-wrap { position: relative; height: 300px; flex-shrink: 0; overflow: hidden; }
+.s3-photo-bg {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #2d5016, #0f3d2e 50%, #1a2f5e);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 70px;
+}
+.s3-grad {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+  background: linear-gradient(transparent, rgba(15,61,46,0.92));
+}
+.s3-back-btn {
+  position: absolute; top: 52px; left: 18px; z-index: 20;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(8px);
+  border: none; color: #fff; font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.s3-hero-info {
+  position: absolute; bottom: 18px; left: 22px; right: 22px; z-index: 5;
+}
+.s3-hero-info h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: #fff; margin-bottom: 3px; }
+.s3-hero-info .s3-role { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 3px; }
+.s3-hero-info .s3-age { font-size: 12px; color: rgba(255,255,255,0.55); }
+.s3-body { padding: 18px 20px; }
+.s3-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.s3-pill { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: var(--indigo-pale); color: var(--indigo); }
+.s3-dates-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.s3-dates-scroll::-webkit-scrollbar { display: none; }
+.s3-date-chip {
+  flex-shrink: 0; padding: 9px 13px; border-radius: 12px;
+  border: 1px solid var(--border); cursor: pointer; text-align: center; transition: all 0.15s;
+  min-width: 72px;
+}
+.s3-date-chip.sel { background: var(--indigo); border-color: var(--indigo); }
+.s3-date-chip .dc-day { font-size: 9px; color: var(--muted); margin-bottom: 1px; }
+.s3-date-chip.sel .dc-day { color: rgba(255,255,255,0.6); }
+.s3-date-chip .dc-num { font-size: 15px; font-weight: 600; color: var(--ink); }
+.s3-date-chip.sel .dc-num { color: #fff; }
+.s3-date-chip .dc-time { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.s3-date-chip.sel .dc-time { color: rgba(255,255,255,0.6); }
+.s3-sticky { padding: 12px 20px 12px; flex-shrink: 0; border-top: 0.5px solid var(--border); background: var(--white); }
+
+/* ========================
+   SCREEN 4 — BOOKING
+   ======================== */
+#s4 { background: var(--indigo-wash); }
+.s4-prog { display: flex; gap: 6px; padding: 6px 20px 14px; flex-shrink: 0; }
+.s4-prog-dot { flex: 1; height: 4px; border-radius: 4px; background: var(--border); transition: background 0.3s; }
+.s4-prog-dot.done { background: var(--indigo); }
+.s4-scroll-content { display: flex; flex-direction: column; gap: 12px; padding: 0 20px 4px; }
+.s4-summary { display: flex; gap: 12px; align-items: flex-start; }
+.s4-thumb { width: 50px; height: 50px; border-radius: 10px; background: var(--indigo); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.s4-info h4 { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+.s4-info p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.s4-counter { display: flex; align-items: center; gap: 16px; }
+.s4-cnt-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink); font-family: inherit; transition: background 0.15s; }
+.s4-cnt-btn:hover { background: var(--indigo-pale); }
+.s4-cnt-val { font-size: 16px; font-weight: 500; color: var(--ink); min-width: 60px; text-align: center; }
+.lang-row { display: flex; gap: 8px; }
+.lang-btn { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border); background: var(--white); color: var(--muted); font-family: inherit; }
+.lang-btn.sel { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+.price-line { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.price-line.total { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+.price-line.total span:first-child { font-size: 14px; font-weight: 500; color: var(--ink); }
+.price-line.total span:last-child { font-size: 17px; font-weight: 600; color: var(--indigo); }
+.pay-opts { display: flex; gap: 10px; }
+.pay-opt {
+  flex: 1; padding: 11px 8px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--white);
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.pay-opt.sel { border-color: var(--indigo); background: var(--indigo-wash); }
+.pay-opt .po-icon { font-size: 18px; }
+.pay-opt .po-label { font-size: 11px; font-weight: 500; color: var(--muted); }
+.pay-opt.sel .po-label { color: var(--indigo); }
+.s4-bottom { padding: 12px 20px 14px; flex-shrink: 0; }
+
+/* ========================
+   SCREEN 4b — PAYMENT DETAIL
+   ======================== */
+#s4b { background: var(--white); }
+.s4b-body { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
+.inp-group { display: flex; flex-direction: column; gap: 6px; }
+.inp-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.inp {
+  padding: 13px 14px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--indigo-wash);
+  font-size: 14px; font-family: inherit; color: var(--ink);
+  outline: none; transition: border-color 0.15s;
+}
+.inp:focus { border-color: var(--indigo-light); background: var(--white); }
+.inp-row { display: flex; gap: 10px; }
+.inp-row .inp-group { flex: 1; }
+.s4b-summary {
+  background: var(--indigo-wash); border-radius: 14px; padding: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s4b-summary .s4b-desc { font-size: 13px; color: var(--muted); }
+.s4b-summary .s4b-price { font-size: 16px; font-weight: 600; color: var(--indigo); }
+.s4b-bottom { padding: 14px 20px 14px; flex-shrink: 0; }
+
+/* ========================
+   SCREEN 5 — SHARE
+   ======================== */
+#s5 { background: var(--white); }
+.s5-top { padding: 16px 20px 20px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.s5-check {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--indigo); display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: #fff; margin-bottom: 14px;
+  box-shadow: 0 4px 20px rgba(26,47,94,0.3);
+  animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+.s5-headline { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 24px; color: var(--ink); margin-bottom: 5px; text-align: center; }
+.s5-subline { font-size: 12px; color: var(--muted); text-align: center; }
+.s5-card {
+  margin: 0 20px; border-radius: 20px;
+  background: var(--indigo); padding: 22px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.s5-card-pat { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.07; }
+.s5-logo-row { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 16px; position: relative; z-index: 2; display: flex; align-items: center; gap: 5px; }
+.s5-logo-row span { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 15px; color: rgba(255,255,255,0.7); }
+.s5-avatar { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 14px; position: relative; z-index: 2; }
+.s5-quote { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 16px; color: #fff; text-align: center; line-height: 1.4; margin-bottom: 10px; position: relative; z-index: 2; }
+.s5-meta { font-size: 11px; color: rgba(255,255,255,0.45); text-align: center; line-height: 1.7; position: relative; z-index: 2; }
+.s5-cert { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 14px; font-size: 10px; color: rgba(255,255,255,0.35); position: relative; z-index: 2; }
+.s5-btns { display: flex; gap: 10px; padding: 16px 20px 0; flex-shrink: 0; }
+.s5-btn {
+  flex: 1; padding: 12px 6px; border-radius: 14px;
+  border: 1.5px solid var(--border); background: var(--white);
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; font-size: 11px; color: var(--muted); font-family: inherit;
+  transition: all 0.15s;
+}
+.s5-btn:hover { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-wash); }
+.s5-btn .sbi { font-size: 20px; }
+.s5-journal { text-align: center; padding: 14px 20px 6px; font-size: 13px; color: var(--indigo-light); cursor: pointer; flex-shrink: 0; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(26,47,94,0.95); color: #fff; padding: 10px 20px;
+  border-radius: 20px; font-size: 13px; opacity: 0;
+  transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 9999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.below-label { margin-top: 1.25rem; text-align: center; font-size: 11px; color: rgba(255,255,255,0.15); }
+</style>
+</head>
+<body>
+
+<div class="top-label">
+  <h1>Indigo Alive</h1>
+  <p>Indigo Alive · App Prototype</p>
+</div>
+
+<div class="step-nav">
+  <div class="step-dot active" onclick="goTo(1)" id="dot1">Welcome</div>
+  <div class="step-dot" onclick="goTo(6)" id="dot6">The Craft</div>
+  <div class="step-dot" onclick="goTo(2)" id="dot2">Patterns</div>
+  <div class="step-dot" onclick="goTo(3)" id="dot3">Artisan</div>
+  <div class="step-dot" onclick="goTo(4)" id="dot4">Book</div>
+  <div class="step-dot" onclick="goTo(5)" id="dot5">Share</div>
+</div>
+
+<div class="phone-frame">
+  <div class="phone-inner">
+
+    <!-- ======================== SCREEN 1 ======================== -->
+    <div class="screen active" id="s1">
+      <div class="s1-bg"><div class="s1-bg-circle1"></div><div class="s1-bg-circle2"></div></div>
+      <div class="sb s1-sb" style="background:transparent;position:relative;z-index:10;">
+        <span class="sb-time" style="color:#fff">9:41</span>
+        <div class="sb-icons">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="white" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="white" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="white" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="white"/></svg>
+          <svg width="20" height="12" viewBox="0 0 20 12"><rect x="0" y="1.5" width="17" height="9" rx="2" fill="none" stroke="white" stroke-width="1.2"/><rect x="17.5" y="3.5" width="2" height="5" rx="1" fill="white" opacity="0.5"/><rect x="1.5" y="3" width="11" height="6" rx="1" fill="white"/></svg>
+        </div>
+      </div>
+      <div class="s1-lang" onclick="cycleLang()">
+        <span class="s1-lang-opt active" id="l-en">EN</span>
+        <span class="s1-lang-sep">·</span>
+        <span class="s1-lang-opt" id="l-de">DE</span>
+        <span class="s1-lang-sep">·</span>
+        <span class="s1-lang-opt" id="l-zh">中文</span>
+      </div>
+
+      <div class="s1-body">
+        <div class="s1-pat-wrap">
+          <svg width="130" height="130" viewBox="0 0 130 130" fill="none" stroke="white" stroke-width="1">
+            <rect x="8" y="8" width="50" height="50"/><rect x="72" y="8" width="50" height="50"/>
+            <rect x="8" y="72" width="50" height="50"/><rect x="72" y="72" width="50" height="50"/>
+            <line x1="8" y1="8" x2="58" y2="58"/><line x1="58" y1="8" x2="8" y2="58"/>
+            <line x1="72" y1="8" x2="122" y2="58"/><line x1="122" y1="8" x2="72" y2="58"/>
+            <line x1="8" y1="72" x2="58" y2="122"/><line x1="58" y1="72" x2="8" y2="122"/>
+            <line x1="72" y1="72" x2="122" y2="122"/><line x1="122" y1="72" x2="72" y2="122"/>
+          </svg>
+        </div>
+        <div class="s1-wordmark">Indigo Alive</div>
+        <div class="s1-three">
+          <div class="s1-three-item"><strong id="t-create">Create</strong><span id="t-create-sub">your design</span></div>
+          <div class="s1-three-sep">·</div>
+          <div class="s1-three-item"><strong id="t-dye">Dye</strong><span id="t-dye-sub">by hand</span></div>
+          <div class="s1-three-sep">·</div>
+          <div class="s1-three-item"><strong id="t-keep">Keep</strong><span id="t-keep-sub">forever</span></div>
+        </div>
+      </div>
+
+      <div class="s1-footer">
+        <button class="btn btn-white-solid" onclick="goTo(2)" id="t-book-btn">Book a Workshop →</button>
+        <button class="btn btn-outline" onclick="goTo(6)" id="t-learn-btn">Learn about the craft</button>
+      </div>
+      <div class="hi" style="background:var(--indigo)"><div class="hi-bar" style="background:rgba(255,255,255,0.25)"></div></div>
+    </div>
+
+    <!-- ======================== SCREEN 6: CRAFT INFO ======================== -->
+    <div class="screen" id="s6">
+      <div class="sb" style="background:var(--indigo);padding-top:52px;">
+        <span class="sb-time" style="color:#fff">9:41</span>
+        <div class="sb-icons" style="color:#fff">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="white" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="white" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="white" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="white"/></svg>
+        </div>
+      </div>
+      <div class="nb" style="background:var(--indigo);padding-top:4px;">
+        <button class="nb-back" onclick="goTo(1)" style="background:rgba(255,255,255,0.12);color:#fff;">←</button>
+        <div class="nb-title" style="color:#fff">The Craft</div>
+        <div class="nb-space"></div>
+      </div>
+
+      <div class="scroll">
+        <div class="s6-hero">
+          <div class="s6-hero-bg">
+            <svg width="320" height="200" viewBox="0 0 320 200" fill="none" stroke="white" stroke-width="1">
+              <rect x="20" y="20" width="60" height="60"/><rect x="100" y="20" width="60" height="60"/><rect x="180" y="20" width="60" height="60"/><rect x="260" y="20" width="60" height="60"/>
+              <rect x="20" y="100" width="60" height="60"/><rect x="100" y="100" width="60" height="60"/><rect x="180" y="100" width="60" height="60"/>
+              <line x1="20" y1="20" x2="80" y2="80"/><line x1="80" y1="20" x2="20" y2="80"/>
+              <line x1="100" y1="20" x2="160" y2="80"/><line x1="160" y1="20" x2="100" y2="80"/>
+            </svg>
+          </div>
+          <div class="s6-hero-title">Indigo Dyeing<br>in Sanxia</div>
+        </div>
+
+        <div class="s6-scroll">
+          <div class="s6-section">
+            <h3>What is Indigo Dyeing?</h3>
+            <p>Shibori is a Japanese word for several methods of dyeing cloth with a pattern. Fabric is folded, twisted, pleated or bound — then dipped in natural indigo dye. Only the unbound areas absorb the color, creating unique patterns that can never be exactly reproduced.</p>
+          </div>
+
+          <div class="s6-section">
+            <h3>History of Sanxia</h3>
+            <div class="s6-timeline">
+              <div class="s6-tl-item"><div class="s6-tl-year">1820s</div><div class="s6-tl-text">Immigrants from Anxi, China bring indigo plants to Sanxia. The Old Street becomes a dyeing hub.</div></div>
+              <div class="s6-tl-item"><div class="s6-tl-year">1896</div><div class="s6-tl-text">Industrial chemical dyes from Germany devastate the traditional craft. Most workshops close.</div></div>
+              <div class="s6-tl-item"><div class="s6-tl-year">1990s</div><div class="s6-tl-text">Community revival begins. The San Chiao Yung Culture Association is founded in 1996.</div></div>
+              <div class="s6-tl-item"><div class="s6-tl-year">2002</div><div class="s6-tl-text">First Sanhsia Indigo Dyeing Festival — annual celebration of the living craft.</div></div>
+              <div class="s6-tl-item"><div class="s6-tl-year">2024</div><div class="s6-tl-text">Sanxia artisans exhibit at Paris MAISON & OBJET. Global recognition begins.</div></div>
+            </div>
+          </div>
+
+          <div class="s6-section">
+            <h3>The 5 Shibori Techniques</h3>
+            <div class="s6-tag-row">
+              <span class="s6-tag">Itajime — Clamp</span>
+              <span class="s6-tag">Kumo — Spider</span>
+              <span class="s6-tag">Arashi — Storm</span>
+              <span class="s6-tag">Miura — Looping</span>
+              <span class="s6-tag">Nui — Stitch</span>
+            </div>
+          </div>
+
+          <div class="s6-section">
+            <h3>Eco & Sustainability</h3>
+            <p>Natural indigo dyeing is 100% biodegradable. The Sanxia workshop uses under-forest grown indigo plants (Strobilanthes formosanus) as part of a certified sustainable ecosystem. Peace Island Geopark holds ISO 20121 certification for sustainable tourism.</p>
+          </div>
+
+          <div style="padding-bottom: 16px;">
+            <button class="btn btn-dark" onclick="goTo(2)">Book a Workshop Now →</button>
+          </div>
+        </div>
+      </div>
+      <div class="hi" style="background:#fff"><div class="hi-bar" style="background:rgba(0,0,0,0.12)"></div></div>
+    </div>
+
+    <!-- ======================== SCREEN 2: PATTERN PICKER ======================== -->
+    <div class="screen" id="s2" style="background:var(--indigo-wash);">
+      <div class="sb" style="background:var(--indigo-wash);">
+        <span class="sb-time" style="color:var(--ink)">9:41</span>
+        <div class="sb-icons">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="#1a2f5e" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="#1a2f5e" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="#1a2f5e" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="#1a2f5e"/></svg>
+        </div>
+      </div>
+      <div class="nb" style="background:var(--indigo-wash);">
+        <button class="nb-back" onclick="goTo(1)">←</button>
+        <div class="nb-title" id="t-pick-title">Choose Your Pattern</div>
+        <div class="nb-space"></div>
+      </div>
+
+      <div class="s2-preview-wrap">
+        <div class="s2-svg-wrap" id="s2-svg-wrap">
+          <!-- filled by JS -->
+        </div>
+        <div class="s2-bottom-label">
+          <h4 id="s2-pat-name">Itajime — Geometric Clamp</h4>
+          <span class="badge badge-easy" id="s2-pat-badge">Beginner</span>
+        </div>
+      </div>
+
+      <div class="s2-thumbs-wrap">
+        <div class="s2-thumbs" id="s2-thumbs"></div>
+      </div>
+
+      <div class="s2-sliders-wrap">
+        <div class="sl-row">
+          <div class="sl-header"><span id="t-size-label">Pattern Size</span><span id="size-val">Medium</span></div>
+          <div class="sl-track" id="sl-size"><div class="sl-fill" id="sf-size" style="width:55%"></div><div class="sl-handle" id="sh-size" style="left:calc(55% - 10px)"></div></div>
+        </div>
+        <div class="sl-row">
+          <div class="sl-header"><span id="t-density-label">Density</span><span id="density-val">3×3</span></div>
+          <div class="sl-track" id="sl-density"><div class="sl-fill" id="sf-density" style="width:40%"></div><div class="sl-handle" id="sh-density" style="left:calc(40% - 10px)"></div></div>
+        </div>
+      </div>
+
+      <div class="s2-book-wrap">
+        <button class="btn btn-dark" onclick="goTo(3)" id="t-book-pat">Book This Pattern →</button>
+      </div>
+      <div class="hi" style="background:var(--indigo-wash)"><div class="hi-bar" style="background:rgba(0,0,0,0.12)"></div></div>
+    </div>
+
+    <!-- ======================== SCREEN 3: ARTISAN ======================== -->
+    <div class="screen" id="s3">
+      <div style="position:relative;flex-shrink:0;">
+        <div class="sb" style="background:transparent;position:absolute;top:0;left:0;right:0;z-index:20;padding-top:52px;">
+          <span class="sb-time" style="color:#fff">9:41</span>
+          <div class="sb-icons"><svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="white" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="white" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="white" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="white"/></svg></div>
+        </div>
+        <button class="s3-back-btn" onclick="goTo(2)">←</button>
+        <div class="s3-hero-wrap">
+          <div class="s3-photo-bg">🧵</div>
+          <div class="s3-grad"></div>
+          <div class="s3-hero-info">
+            <h2>Master Chen Wei</h2>
+            <div class="s3-role" id="t-s3-role">Sanxia Old Street Workshop</div>
+            <div class="s3-age" id="t-s3-age">67 years old · 30+ years of experience</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <div class="s3-body">
+          <div class="sec-label" id="t-s3-story-label">His Story</div>
+          <p id="t-s3-story" style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px">Chen Wei has been practicing indigo dyeing since 1989, learning the ancient Sanxia technique from his father. He has dedicated his life to preserving this nearly lost craft and training young apprentices.</p>
+
+          <div class="sec-label" id="t-s3-spec-label">Specialties</div>
+          <div class="s3-pills" style="margin-bottom:14px">
+            <span class="s3-pill">Itajime</span>
+            <span class="s3-pill">Kumo</span>
+            <span class="s3-pill">Arashi</span>
+          </div>
+
+          <div class="sec-label" style="margin-bottom:6px" id="t-s3-sessions-label">Sessions completed</div>
+          <p id="t-s3-sessions" style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:14px">48 workshops · Speaks EN, 中文</p>
+
+          <div class="divider"></div>
+          <div class="sec-label" id="t-dates-label">Available Dates & Times</div>
+          <div class="s3-dates-scroll" id="s3-dates"></div>
+        </div>
+      </div>
+
+      <div class="s3-sticky">
+        <button class="btn btn-dark" onclick="goTo(4)" id="t-book-artisan">Book with Chen Wei →</button>
+      </div>
+      <div class="hi"><div class="hi-bar" style="background:rgba(0,0,0,0.1)"></div></div>
+    </div>
+
+    <!-- ======================== SCREEN 4: BOOKING ======================== -->
+    <div class="screen" id="s4" style="background:var(--indigo-wash)">
+      <div class="sb" style="background:var(--indigo-wash)">
+        <span class="sb-time" style="color:var(--ink)">9:41</span>
+        <div class="sb-icons"><svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="#1a2f5e" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="#1a2f5e" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="#1a2f5e" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="#1a2f5e"/></svg></div>
+      </div>
+      <div class="nb" style="background:var(--indigo-wash)">
+        <button class="nb-back" onclick="goTo(3)">←</button>
+        <div class="nb-title" id="t-confirm-title">Confirm Booking</div>
+        <div class="nb-space"></div>
+      </div>
+      <div class="s4-prog">
+        <div class="s4-prog-dot done"></div>
+        <div class="s4-prog-dot done"></div>
+        <div class="s4-prog-dot"></div>
+      </div>
+
+      <div class="scroll">
+        <div class="s4-scroll-content">
+          <div class="card">
+            <div class="s4-summary">
+              <div class="s4-thumb">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="white" stroke-width="1.2"><rect x="2" y="2" width="10" height="10"/><rect x="16" y="2" width="10" height="10"/><rect x="2" y="16" width="10" height="10"/><rect x="16" y="16" width="10" height="10"/><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+              </div>
+              <div class="s4-info">
+                <h4 id="t-s4-workshop-name">Itajime Workshop</h4>
+                <p id="t-s4-workshop-detail">With Chen Wei · Mon 26 May · 14:00<br>Sanxia Old Street Workshop</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="sec-label" id="t-participants-label">Participants</div>
+            <div class="s4-counter">
+              <button class="s4-cnt-btn" onclick="changeCount(-1)">−</button>
+              <span class="s4-cnt-val" id="count-val">1 person</span>
+              <button class="s4-cnt-btn" onclick="changeCount(1)">+</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="sec-label" id="t-lang-label">Workshop Language</div>
+            <div class="lang-row">
+              <button class="lang-btn sel" onclick="selLang(this,'en')" data-lang="en">EN</button>
+              <button class="lang-btn" onclick="selLang(this,'de')" data-lang="de">DE</button>
+              <button class="lang-btn" onclick="selLang(this,'zh')" data-lang="zh">中文</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="sec-label" id="t-price-label">Price</div>
+            <div class="price-line"><span id="t-workshop-price">Workshop</span><span id="price-workshop">NT$800</span></div>
+            <div class="price-line"><span id="t-booking-fee">Booking fee</span><span>NT$40</span></div>
+            <div class="price-line total"><span id="t-total">Total</span><span id="price-total">NT$840</span></div>
+          </div>
+
+          <div class="card">
+            <div class="sec-label" id="t-payment-label">Payment Method</div>
+            <div class="pay-opts">
+              <button class="pay-opt sel" onclick="selPay(this,'visa')"><span class="po-icon">💳</span><span class="po-label" id="t-pay-visa">Visa / MC</span></button>
+              <button class="pay-opt" onclick="selPay(this,'paypal')"><span class="po-icon">🅿️</span><span class="po-label" id="t-pay-paypal">PayPal</span></button>
+              <button class="pay-opt" onclick="selPay(this,'cash')"><span class="po-icon">💵</span><span class="po-label" id="t-pay-cash">Cash</span></button>
+            </div>
+          </div>
+
+          <div style="padding-bottom:8px"><!-- spacer --></div>
+        </div>
+      </div>
+
+      <div class="s4-bottom">
+        <button class="btn btn-dark" onclick="goToPayment()" id="pay-btn">Pay NT$840 Now →</button>
+      </div>
+      <div class="hi" style="background:var(--indigo-wash)"><div class="hi-bar" style="background:rgba(0,0,0,0.12)"></div></div>
+    </div>
+
+    <!-- ======================== SCREEN 4b: PAYMENT DETAIL ======================== -->
+    <div class="screen" id="s4b">
+      <div class="sb" style="background:#fff">
+        <span class="sb-time" style="color:var(--ink)">9:41</span>
+        <div class="sb-icons"><svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="#1a2f5e" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="#1a2f5e" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="#1a2f5e" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="#1a2f5e"/></svg></div>
+      </div>
+      <div class="nb" style="background:#fff;border-bottom:0.5px solid var(--border)">
+        <button class="nb-back" onclick="goTo(4)">←</button>
+        <div class="nb-title" id="s4b-title">Payment Details</div>
+        <div class="nb-space"></div>
+      </div>
+
+      <div class="scroll">
+        <div class="s4b-body" style="padding-top:16px">
+          <div class="s4b-summary">
+            <div class="s4b-desc">Itajime Workshop · Mon 26 May</div>
+            <div class="s4b-price" id="s4b-price">NT$840</div>
+          </div>
+
+          <div id="card-fields">
+            <div class="inp-group">
+              <div class="inp-label" id="t-cardholder">Cardholder Name</div>
+              <input class="inp" type="text" placeholder="Sofia Müller">
+            </div>
+            <div class="inp-group">
+              <div class="inp-label" id="t-cardnumber">Card Number</div>
+              <input class="inp" type="text" placeholder="0000 0000 0000 0000" maxlength="19">
+            </div>
+            <div class="inp-row">
+              <div class="inp-group">
+                <div class="inp-label" id="t-expiry">Expiry</div>
+                <input class="inp" type="text" placeholder="MM / YY" maxlength="7">
+              </div>
+              <div class="inp-group">
+                <div class="inp-label" id="t-cvc">CVC</div>
+                <input class="inp" type="text" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+          </div>
+
+          <div id="paypal-fields" style="display:none">
+            <div class="inp-group">
+              <div class="inp-label" id="t-paypal-email">PayPal Email</div>
+              <input class="inp" type="email" placeholder="sofia@example.com">
+            </div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:-4px">You will be redirected to PayPal to complete the payment securely.</p>
+          </div>
+
+          <div id="cash-fields" style="display:none">
+            <div style="background:var(--indigo-wash);border-radius:12px;padding:14px;">
+              <p style="font-size:13px;color:var(--indigo);font-weight:500;margin-bottom:6px">Cash payment at the workshop</p>
+              <p style="font-size:12px;color:var(--muted);line-height:1.6">Please bring NT$840 in cash on the day. Your booking is confirmed — no payment needed now. New Taiwan Dollar only.</p>
+            </div>
+          </div>
+
+          <div class="inp-group">
+            <div class="inp-label" id="t-email-confirm">Email for confirmation</div>
+            <input class="inp" type="email" placeholder="your@email.com">
+          </div>
+          <div style="padding-bottom:8px"></div>
+        </div>
+      </div>
+
+      <div class="s4b-bottom">
+        <button class="btn btn-dark" onclick="goTo(5)" id="confirm-btn">Confirm & Book →</button>
+      </div>
+      <div class="hi"><div class="hi-bar" style="background:rgba(0,0,0,0.1)"></div></div>
+    </div>
+
+    <!-- ======================== SCREEN 5: SHARE ======================== -->
+    <div class="screen" id="s5">
+      <div class="sb" style="background:#fff">
+        <span class="sb-time" style="color:var(--ink)">9:41</span>
+        <div class="sb-icons"><svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="4" width="2.5" height="7" rx="0.8" fill="#1a2f5e" opacity="0.4"/><rect x="4" y="2.5" width="2.5" height="8.5" rx="0.8" fill="#1a2f5e" opacity="0.6"/><rect x="8" y="0.5" width="2.5" height="10.5" rx="0.8" fill="#1a2f5e" opacity="0.85"/><rect x="12" y="0" width="3" height="11" rx="0.8" fill="#1a2f5e"/></svg></div>
+      </div>
+
+      <div class="s5-top">
+        <div class="s5-check">✓</div>
+        <div class="s5-headline" id="t-s5-headline">Your piece is ready.</div>
+        <div class="s5-subline" id="t-s5-subline">Chen Wei has signed your digital certificate.</div>
+      </div>
+
+      <div class="s5-card">
+        <div class="s5-card-pat">
+          <svg width="340" height="220" viewBox="0 0 340 220" fill="none" stroke="white" stroke-width="1.5">
+            <rect x="10" y="10" width="60" height="60"/><rect x="90" y="10" width="60" height="60"/><rect x="170" y="10" width="60" height="60"/><rect x="250" y="10" width="60" height="60"/>
+            <rect x="10" y="90" width="60" height="60"/><rect x="90" y="90" width="60" height="60"/><rect x="170" y="90" width="60" height="60"/>
+            <rect x="10" y="160" width="60" height="60"/><rect x="90" y="160" width="60" height="60"/>
+            <line x1="10" y1="10" x2="70" y2="70"/><line x1="70" y1="10" x2="10" y2="70"/>
+            <line x1="90" y1="10" x2="150" y2="70"/><line x1="150" y1="10" x2="90" y2="70"/>
+            <line x1="170" y1="10" x2="230" y2="70"/><line x1="230" y1="10" x2="170" y2="70"/>
+          </svg>
+        </div>
+        <div class="s5-logo-row">🌿 <span>Indigo Alive</span></div>
+        <div class="s5-avatar">🧵</div>
+        <div class="s5-quote" id="t-s5-quote">"I made this at Sanxia<br>Indigo Workshop"</div>
+        <div class="s5-meta">Itajime technique · With Master Chen Wei<br>Sanxia, Taiwan · 26 May 2026</div>
+        <div class="s5-cert" id="t-s5-cert">Authenticity certified by Sanxia Culture Association</div>
+      </div>
+
+      <div class="s5-btns">
+        <button class="s5-btn" onclick="shareAction('save')"><span class="sbi">🖼</span>Save</button>
+        <button class="s5-btn" onclick="shareAction('instagram')"><span class="sbi">📸</span>Instagram</button>
+        <button class="s5-btn" onclick="shareAction('tiktok')"><span class="sbi">🎵</span>TikTok</button>
+        <button class="s5-btn" onclick="shareAction('copy')"><span class="sbi">🔗</span>Copy link</button>
+      </div>
+
+      <div class="s5-journal" onclick="goTo(1)" id="t-s5-journal">↩ Back to home · View my dye journal</div>
+      <div class="hi"><div class="hi-bar" style="background:rgba(0,0,0,0.1)"></div></div>
+    </div>
+
+  </div><!-- phone-inner -->
+</div><!-- phone-frame -->
+
+<div class="below-label"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================
+// PATTERNS DATA
+// ========================
+const PATTERNS = [
+  { name: 'Itajime — Geometric', diff: 'Beginner', cls: 'badge-easy',
+    thumb: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="white" stroke-width="1"><rect x="2" y="2" width="14" height="14"/><rect x="20" y="2" width="14" height="14"/><rect x="2" y="20" width="14" height="14"/><rect x="20" y="20" width="14" height="14"/><line x1="2" y1="2" x2="16" y2="16"/><line x1="16" y1="2" x2="2" y2="16"/></svg>`,
+    label: 'Itajime' },
+  { name: 'Kumo — Spider Web', diff: 'Intermediate', cls: 'badge-med',
+    thumb: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="white" stroke-width="1"><circle cx="18" cy="18" r="14"/><circle cx="18" cy="18" r="8"/><circle cx="18" cy="18" r="3"/><line x1="18" y1="4" x2="18" y2="32"/><line x1="4" y1="18" x2="32" y2="18"/><line x1="8" y1="8" x2="28" y2="28"/><line x1="28" y1="8" x2="8" y2="28"/></svg>`,
+    label: 'Kumo' },
+  { name: 'Arashi — Storm', diff: 'Intermediate', cls: 'badge-med',
+    thumb: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="white" stroke-width="2.5"><line x1="0" y1="6" x2="36" y2="24"/><line x1="0" y1="14" x2="36" y2="32"/><line x1="0" y1="0" x2="36" y2="18"/></svg>`,
+    label: 'Arashi' },
+  { name: 'Miura — Dot Field', diff: 'Beginner', cls: 'badge-easy',
+    thumb: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="white" stroke-width="1.2"><circle cx="8" cy="8" r="3"/><circle cx="20" cy="6" r="2.5"/><circle cx="30" cy="10" r="3.5"/><circle cx="6" cy="20" r="2.5"/><circle cx="18" cy="22" r="4"/><circle cx="30" cy="20" r="2.5"/><circle cx="10" cy="30" r="3"/><circle cx="24" cy="30" r="3.5"/></svg>`,
+    label: 'Miura' },
+  { name: 'Nui — Stitch Lines', diff: 'Advanced', cls: 'badge-hard',
+    thumb: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="white" stroke-width="1.5"><path d="M2 8 Q10 2 18 8 Q26 14 34 8"/><path d="M2 18 Q10 12 18 18 Q26 24 34 18"/><path d="M2 28 Q10 22 18 28 Q26 34 34 28"/></svg>`,
+    label: 'Nui' }
+];
+
+const SVGS = {
+  itajime: (s, d) => {
+    const step = Math.max(20, 70 - s * 30);
+    const lines = [];
+    for (let x = 0; x < 300; x += step * 1.1) {
+      for (let y = 0; y < 200; y += step * 1.1) {
+        lines.push(`<rect x="${x+2}" y="${y+2}" width="${step-4}" height="${step-4}" stroke="white" stroke-width="1" fill="none"/>`);
+        lines.push(`<line x1="${x+2}" y1="${y+2}" x2="${x+step-4}" y2="${y+step-4}" stroke="white" stroke-width="0.7" opacity="0.7"/>`);
+        lines.push(`<line x1="${x+step-4}" y1="${y+2}" x2="${x+2}" y2="${y+step-4}" stroke="white" stroke-width="0.7" opacity="0.7"/>`);
+      }
+    }
+    return `<svg width="300" height="200" viewBox="0 0 300 200" fill="none" opacity="0.85">${lines.join('')}</svg>`;
+  },
+  kumo: (s, d) => {
+    const items = [];
+    const num = Math.max(1, Math.round(d * 4));
+    const rs = [60-s*15, 42-s*10, 24-s*6, 10];
+    for (let i = 0; i < num; i++) {
+      for (let j = 0; j < num; j++) {
+        const cx = 50 + (i * (200/num)), cy = 40 + (j * (120/num));
+        rs.forEach((r, ri) => {
+          items.push(`<circle cx="${cx}" cy="${cy}" r="${r}" stroke="white" stroke-width="${ri===3?1:0.8}" fill="none" opacity="${0.5+ri*0.12}"/>`);
+        });
+        items.push(`<line x1="${cx}" y1="${cy-60+s*15}" x2="${cx}" y2="${cy+60-s*15}" stroke="white" stroke-width="0.6" opacity="0.5"/>`);
+        items.push(`<line x1="${cx-60+s*15}" y1="${cy}" x2="${cx+60-s*15}" y2="${cy}" stroke="white" stroke-width="0.6" opacity="0.5"/>`);
+      }
+    }
+    return `<svg width="300" height="200" viewBox="0 0 300 200" fill="none">${items.join('')}</svg>`;
+  },
+  arashi: (s, d) => {
+    const lines = [];
+    const gap = Math.max(8, 28 - s * 10);
+    const angle = 0.45 + s * 0.15;
+    for (let i = -10; i < 20; i++) {
+      const y0 = i * gap;
+      lines.push(`<line x1="0" y1="${y0}" x2="300" y2="${y0 + 300*angle}" stroke="white" stroke-width="${2+s}" opacity="0.7"/>`);
+    }
+    return `<svg width="300" height="200" viewBox="0 0 300 200" fill="none">${lines.join('')}</svg>`;
+  },
+  miura: (s, d) => {
+    const dots = [];
+    const num = Math.round(3 + d * 8);
+    const r = Math.max(4, 14 - s * 5);
+    for (let i = 0; i < num; i++) {
+      for (let j = 0; j < Math.round(num * 0.7); j++) {
+        const x = 20 + (i / num) * 260 + (j%2===0?0:10);
+        const y = 20 + (j / (num*0.7)) * 160;
+        dots.push(`<circle cx="${x}" cy="${y}" r="${r}" stroke="white" stroke-width="1.2" fill="none" opacity="0.85"/>`);
+      }
+    }
+    return `<svg width="300" height="200" viewBox="0 0 300 200" fill="none">${dots.join('')}</svg>`;
+  },
+  nui: (s, d) => {
+    const paths = [];
+    const rows = Math.round(2 + d * 5);
+    const amp = 10 + s * 18;
+    for (let i = 0; i < rows; i++) {
+      const y = 20 + (i / rows) * 160;
+      paths.push(`<path d="M0 ${y} Q75 ${y-amp} 150 ${y} Q225 ${y+amp} 300 ${y}" stroke="white" stroke-width="${1.5+s*0.5}" fill="none" opacity="0.85"/>`);
+    }
+    return `<svg width="300" height="200" viewBox="0 0 300 200" fill="none">${paths.join('')}</svg>`;
+  }
+};
+const PAT_KEYS = ['itajime','kumo','arashi','miura','nui'];
+
+let currentPat = 0;
+let sizeVal = 0.55;
+let densityVal = 0.40;
+
+function renderPreview() {
+  const key = PAT_KEYS[currentPat];
+  const svgStr = SVGS[key](sizeVal, densityVal);
+  document.getElementById('s2-svg-wrap').innerHTML = svgStr;
+}
+
+function buildThumbs() {
+  const wrap = document.getElementById('s2-thumbs');
+  wrap.innerHTML = '';
+  PATTERNS.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 's2-thumb-item';
+    item.innerHTML = `
+      <div class="s2-thumb ${i===0?'sel':''}" onclick="selectPat(${i},this)">
+        ${p.thumb}
+      </div>
+      <span class="s2-thumb-name">${p.label}</span>`;
+    wrap.appendChild(item);
+  });
+}
+
+function selectPat(i, el) {
+  currentPat = i;
+  document.querySelectorAll('.s2-thumb').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+  const p = PATTERNS[i];
+  document.getElementById('s2-pat-name').textContent = p.name;
+  const badge = document.getElementById('s2-pat-badge');
+  badge.textContent = p.diff;
+  badge.className = 'badge ' + p.cls;
+  renderPreview();
+}
+
+function setupSlider(trackId, fillId, handleId, onChange) {
+  const track = document.getElementById(trackId);
+  const fill = document.getElementById(fillId);
+  const handle = document.getElementById(handleId);
+  let dragging = false;
+
+  function update(e) {
+    const rect = track.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let pct = (clientX - rect.left) / rect.width;
+    pct = Math.min(1, Math.max(0, pct));
+    fill.style.width = (pct * 100) + '%';
+    handle.style.left = 'calc(' + (pct * 100) + '% - 10px)';
+    onChange(pct);
+  }
+
+  track.addEventListener('mousedown', e => { dragging = true; update(e); });
+  track.addEventListener('touchstart', e => { dragging = true; update(e); }, { passive: true });
+  document.addEventListener('mousemove', e => { if (dragging) update(e); });
+  document.addEventListener('touchmove', e => { if (dragging) update(e); }, { passive: true });
+  document.addEventListener('mouseup', () => { dragging = false; });
+  document.addEventListener('touchend', () => { dragging = false; });
+}
+
+const SIZE_LABELS = ['XS','Small','Medium','Large','XL'];
+const DENSITY_LABELS = ['1×1','2×2','3×3','4×4','5×5'];
+
+setupSlider('sl-size','sf-size','sh-size', pct => {
+  sizeVal = pct;
+  const idx = Math.min(4, Math.floor(pct * 5));
+  document.getElementById('size-val').textContent = SIZE_LABELS[idx];
+  renderPreview();
+});
+setupSlider('sl-density','sf-density','sh-density', pct => {
+  densityVal = pct;
+  const idx = Math.min(4, Math.floor(pct * 5));
+  document.getElementById('density-val').textContent = DENSITY_LABELS[idx];
+  renderPreview();
+});
+
+// Dates for screen 3
+function buildDates() {
+  const wrap = document.getElementById('s3-dates');
+  const days = [['Mon','26','14:00'],['Tue','27','10:00'],['Tue','27','15:30'],['Wed','28','14:00'],['Thu','29','11:00'],['Fri','30','14:00']];
+  wrap.innerHTML = '';
+  days.forEach((d, i) => {
+    const chip = document.createElement('div');
+    chip.className = 's3-date-chip' + (i===0?' sel':'');
+    chip.innerHTML = `<div class="dc-day">${d[0]}</div><div class="dc-num">${d[1]}</div><div class="dc-time">${d[2]}</div>`;
+    chip.onclick = () => { document.querySelectorAll('.s3-date-chip').forEach(c=>c.classList.remove('sel')); chip.classList.add('sel'); };
+    wrap.appendChild(chip);
+  });
+}
+
+// NAVIGATION
+let current = 1;
+function goTo(n) {
+  document.getElementById('s'+current).classList.remove('active');
+  const el = document.getElementById('dot'+n);
+  const prev = document.getElementById('dot'+current);
+  if (el) el.classList.add('active');
+  if (prev) prev.classList.remove('active');
+  current = n;
+  const screen = document.getElementById('s'+n);
+  screen.classList.add('active');
+  screen.style.animation = 'none';
+  screen.offsetHeight;
+  screen.style.animation = 'sIn 0.28s ease';
+}
+
+// Payment flow
+let payMethod = 'visa';
+function selPay(btn, method) {
+  payMethod = method;
+  document.querySelectorAll('.pay-opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function goToPayment() {
+  document.getElementById('card-fields').style.display = payMethod==='visa' ? 'flex' : 'none';
+  document.getElementById('card-fields').style.flexDirection = 'column';
+  document.getElementById('card-fields').style.gap = '14px';
+  document.getElementById('paypal-fields').style.display = payMethod==='paypal' ? 'flex' : 'none';
+  document.getElementById('paypal-fields').style.flexDirection = 'column';
+  document.getElementById('paypal-fields').style.gap = '10px';
+  document.getElementById('cash-fields').style.display = payMethod==='cash' ? 'block' : 'none';
+  const titles = { visa: 'Card Details', paypal: 'PayPal', cash: 'Cash Booking' };
+  document.getElementById('s4b-title').textContent = titles[payMethod];
+  const confirmLabels = { visa: 'Confirm & Pay →', paypal: 'Continue to PayPal →', cash: 'Confirm Booking →' };
+  document.getElementById('confirm-btn').textContent = confirmLabels[payMethod];
+  document.getElementById('s4b-price').textContent = document.getElementById('price-total').textContent;
+  goTo('4b');
+}
+
+// Count & price
+let paxCount = 1;
+const BASE_PRICE = 800;
+const FEE = 40;
+function changeCount(d) {
+  paxCount = Math.max(1, Math.min(10, paxCount + d));
+  document.getElementById('count-val').textContent = paxCount + (paxCount===1?' person':' people');
+  const total = paxCount * BASE_PRICE + FEE;
+  document.getElementById('price-workshop').textContent = 'NT$' + (paxCount * BASE_PRICE);
+  document.getElementById('price-total').textContent = 'NT$' + total;
+  document.getElementById('pay-btn').textContent = 'Pay NT$' + total + ' Now →';
+}
+
+// Language
+let lang = 'en';
+const LANGS = {
+  en: {
+    create:'Create', createSub:'your design', dye:'Dye', dyeSub:'by hand', keep:'Keep', keepSub:'forever',
+    bookBtn:'Book a Workshop →', learnBtn:'Learn about the craft',
+    pickTitle:'Choose Your Pattern', sizeLabel:'Pattern Size', densityLabel:'Density', bookPat:'Book This Pattern →',
+    s3Role:'Sanxia Old Street Workshop', s3Age:'67 years old · 30+ years of experience',
+    s3StoryLabel:'His Story', s3Story:'Chen Wei has been practicing indigo dyeing since 1989, learning the ancient Sanxia technique from his father. He has dedicated his life to preserving this nearly lost craft and training young apprentices.',
+    s3SpecLabel:'Specialties', s3SessionsLabel:'Sessions completed', s3Sessions:'48 workshops · Speaks EN, 中文',
+    datesLabel:'Available Dates & Times', bookArtisan:'Book with Chen Wei →',
+    confirmTitle:'Confirm Booking', workshopName:'Itajime Workshop',
+    workshopDetail:'With Chen Wei · Mon 26 May · 14:00<br>Sanxia Old Street Workshop',
+    participants:'Participants', person:'person', people:'people',
+    langLabel:'Workshop Language', priceLabel:'Price',
+    workshopPrice:'Workshop', bookingFee:'Booking fee', total:'Total', payLabel:'Payment Method',
+    payVisa:'Visa / MC', payPal:'PayPal', payCash:'Cash',
+    payTitle4b:'Payment Details', confirmBtn:'Confirm & Pay →', paypalBtn:'Continue to PayPal →', cashBtn:'Confirm Booking →',
+    cardholder:'Cardholder Name', cardNumber:'Card Number', expiry:'Expiry', cvc:'CVC',
+    paypalEmail:'PayPal Email', emailConfirm:'Email for confirmation',
+    s5Headline:'Your piece is ready.', s5Subline:'Chen Wei has signed your digital certificate.',
+    s5Quote:'"I made this at Sanxia<br>Indigo Workshop"',
+    s5Cert:'Authenticity certified by Sanxia Culture Association',
+    s5Journal:'↩ Back to home · View my dye journal',
+  },
+  de: {
+    create:'Gestalten', createSub:'dein Muster', dye:'Färben', dyeSub:'von Hand', keep:'Behalten', keepSub:'für immer',
+    bookBtn:'Workshop buchen →', learnBtn:'Über das Handwerk',
+    pickTitle:'Wähle dein Muster', sizeLabel:'Mustergröße', densityLabel:'Dichte', bookPat:'Dieses Muster buchen →',
+    s3Role:'Sanxia Altstadt Workshop', s3Age:'67 Jahre alt · 30+ Jahre Erfahrung',
+    s3StoryLabel:'Seine Geschichte', s3Story:'Chen Wei praktiziert Indigofärben seit 1989. Er hat die jahrhundertealte Sanxia-Technik von seinem Vater gelernt und widmet sein Leben dem Erhalt dieses fast verlorenen Handwerks.',
+    s3SpecLabel:'Spezialgebiete', s3SessionsLabel:'Abgeschlossene Sitzungen', s3Sessions:'48 Workshops · Spricht EN, 中文, DE',
+    datesLabel:'Verfügbare Termine', bookArtisan:'Mit Chen Wei buchen →',
+    confirmTitle:'Buchung bestätigen', workshopName:'Itajime-Workshop',
+    workshopDetail:'Mit Chen Wei · Mo. 26. Mai · 14:00<br>Sanxia Altstadt Workshop',
+    participants:'Teilnehmer', person:'Person', people:'Personen',
+    langLabel:'Workshop-Sprache', priceLabel:'Preis',
+    workshopPrice:'Workshop', bookingFee:'Buchungsgebühr', total:'Gesamt', payLabel:'Zahlungsmethode',
+    payVisa:'Visa / MC', payPal:'PayPal', payCash:'Bargeld',
+    payTitle4b:'Zahlungsdetails', confirmBtn:'Bestätigen & Bezahlen →', paypalBtn:'Weiter zu PayPal →', cashBtn:'Buchung bestätigen →',
+    cardholder:'Karteninhaber', cardNumber:'Kartennummer', expiry:'Ablaufdatum', cvc:'CVC',
+    paypalEmail:'PayPal E-Mail', emailConfirm:'E-Mail für Bestätigung',
+    s5Headline:'Dein Stück ist fertig.', s5Subline:'Chen Wei hat dein digitales Zertifikat unterzeichnet.',
+    s5Quote:'"Ich habe das im Sanxia<br>Indigo Workshop gemacht"',
+    s5Cert:'Echtheit zertifiziert von der Sanxia Kulturvereinigung',
+    s5Journal:'↩ Zurück zur Startseite · Mein Färbetagebuch',
+  },
+  zh: {
+    create:'設計', createSub:'你的花紋', dye:'染色', dyeSub:'親手製作', keep:'保留', keepSub:'永久珍藏',
+    bookBtn:'預訂工作坊 →', learnBtn:'了解藍染工藝',
+    pickTitle:'選擇花紋', sizeLabel:'花紋大小', densityLabel:'密度', bookPat:'預訂此花紋 →',
+    s3Role:'三峽老街工作坊', s3Age:'67歲 · 30多年藍染經驗',
+    s3StoryLabel:'他的故事', s3Story:'陳威自1989年開始學習藍染，從父親那裡習得古老的三峽技法。他畢生致力於保存這項瀕臨失傳的工藝，並培育年輕學徒。',
+    s3SpecLabel:'專長技法', s3SessionsLabel:'已完成工作坊', s3Sessions:'48場工作坊 · 使用語言：中文、EN',
+    datesLabel:'可選日期與時間', bookArtisan:'與陳威預訂 →',
+    confirmTitle:'確認預訂', workshopName:'板締工作坊',
+    workshopDetail:'與陳威 · 5月26日（一）· 14:00<br>三峽老街工作坊',
+    participants:'參加人數', person:'人', people:'人',
+    langLabel:'工作坊語言', priceLabel:'價格',
+    workshopPrice:'工作坊費用', bookingFee:'訂位費', total:'總計', payLabel:'付款方式',
+    payVisa:'Visa / MC', payPal:'PayPal', payCash:'現金',
+    payTitle4b:'付款資料', confirmBtn:'確認並付款 →', paypalBtn:'前往 PayPal →', cashBtn:'確認預訂 →',
+    cardholder:'持卡人姓名', cardNumber:'卡號', expiry:'有效日期', cvc:'安全碼',
+    paypalEmail:'PayPal 電子郵件', emailConfirm:'確認電子郵件',
+    s5Headline:'你的作品完成了。', s5Subline:'陳威已為你的數位證書簽名。',
+    s5Quote:'"我在三峽藍染工作坊<br>親手製作了這件作品"',
+    s5Cert:'由三角湧文化協進會認證',
+    s5Journal:'↩ 返回首頁 · 查看我的染布日記',
+  }
+};
+
+let langIdx = 0;
+const langKeys = ['en','de','zh'];
+function cycleLang() {
+  langIdx = (langIdx + 1) % 3;
+  applyLang(langKeys[langIdx]);
+}
+function selLang(btn, l) {
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  applyLang(l);
+}
+function applyLang(l) {
+  lang = l;
+  langIdx = langKeys.indexOf(l);
+  // Update lang toggle highlight
+  ['en','de','zh'].forEach(k => document.getElementById('l-'+k)?.classList.remove('active'));
+  const map = {en:'l-en', de:'l-de', zh:'l-zh'};
+  document.getElementById(map[l])?.classList.add('active');
+  const t = LANGS[l];
+  // innerHTML-capable set (for elements with <br>)
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  const setHTML = (id, val) => { const el=document.getElementById(id); if(el) el.innerHTML=val; };
+  // Screen 1
+  set('t-create', t.create); set('t-create-sub', t.createSub);
+  set('t-dye', t.dye); set('t-dye-sub', t.dyeSub);
+  set('t-keep', t.keep); set('t-keep-sub', t.keepSub);
+  set('t-book-btn', t.bookBtn); set('t-learn-btn', t.learnBtn);
+  // Screen 2
+  set('t-pick-title', t.pickTitle); set('t-size-label', t.sizeLabel);
+  set('t-density-label', t.densityLabel); set('t-book-pat', t.bookPat);
+  // Screen 3
+  set('t-s3-role', t.s3Role); set('t-s3-age', t.s3Age);
+  set('t-s3-story-label', t.s3StoryLabel); set('t-s3-story', t.s3Story);
+  set('t-s3-spec-label', t.s3SpecLabel);
+  set('t-s3-sessions-label', t.s3SessionsLabel); set('t-s3-sessions', t.s3Sessions);
+  set('t-dates-label', t.datesLabel); set('t-book-artisan', t.bookArtisan);
+  // Screen 4
+  set('t-confirm-title', t.confirmTitle);
+  set('t-s4-workshop-name', t.workshopName);
+  setHTML('t-s4-workshop-detail', t.workshopDetail);
+  set('t-participants-label', t.participants);
+  set('t-lang-label', t.langLabel); set('t-price-label', t.priceLabel);
+  set('t-workshop-price', t.workshopPrice); set('t-booking-fee', t.bookingFee);
+  set('t-total', t.total); set('t-payment-label', t.payLabel);
+  set('t-pay-visa', t.payVisa); set('t-pay-paypal', t.payPal); set('t-pay-cash', t.payCash);
+  // Update pay button
+  const total = paxCount * BASE_PRICE + FEE;
+  document.getElementById('pay-btn').textContent = t.confirmBtn.replace('→', '').trim() + ' NT$' + total + ' →';
+  // Screen 4b
+  set('s4b-title', t.payTitle4b);
+  set('t-cardholder', t.cardholder); set('t-cardnumber', t.cardNumber);
+  set('t-expiry', t.expiry); set('t-cvc', t.cvc);
+  set('t-paypal-email', t.paypalEmail); set('t-email-confirm', t.emailConfirm);
+  // Screen 5
+  set('t-s5-headline', t.s5Headline); set('t-s5-subline', t.s5Subline);
+  setHTML('t-s5-quote', t.s5Quote);
+  set('t-s5-cert', t.s5Cert); set('t-s5-journal', t.s5Journal);
+  // Update person/people label
+  const cv = document.getElementById('count-val');
+  if (cv) cv.textContent = paxCount + ' ' + (paxCount === 1 ? t.person : t.people);
+}
+
+// Share actions
+function shareAction(type) {
+  const msgs = {
+    save: '🖼 Image saved to your photos!',
+    instagram: '📸 Opening Instagram...',
+    tiktok: '🎵 Opening TikTok...',
+    copy: '🔗 Link copied to clipboard!'
+  };
+  if (type==='copy') { navigator.clipboard?.writeText('https://indigo-alive.app/certificate/chen-wei-may26'); }
+  showToast(msgs[type]);
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// INIT
+buildThumbs();
+renderPreview();
+buildDates();
+</script>
+</body>
+</html>
