@@ -33,7 +33,8 @@ const BookingFlow: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (!user) {
+        const token = localStorage.getItem("token");
+        if (!user && !token) {
             navigate("/login");
             return;
         }
@@ -66,11 +67,11 @@ const BookingFlow: React.FC = () => {
             }
         };
 
-        fetchData();
+        void fetchData();
     }, [user, workshopId, navigate]);
 
     const handleCreateBooking = async () => {
-        if (!workshopId || !selectedDate || !selectedTimeSlot || !user?.id) {
+        if (!workshopId || !selectedDate || !selectedTimeSlot) {
             setError("Please fill in all required fields");
             return;
         }

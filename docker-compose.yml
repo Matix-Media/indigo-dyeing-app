@@ -2,10 +2,12 @@ services:
     db:
         image: postgres:16-alpine
         restart: unless-stopped
+        ports:
+            - "5432:5432"
         environment:
             POSTGRES_DB: ${DB_NAME:-indigo_dyeing}
             POSTGRES_USER: ${DB_USER:-postgres}
-            POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
         volumes:
             - postgres_data:/var/lib/postgresql/data
         healthcheck:
@@ -19,17 +21,19 @@ services:
             context: ./backend
             dockerfile: Dockerfile
         restart: unless-stopped
+        ports:
+            - "3000:3000"
         environment:
             NODE_ENV: production
-            PORT: 3000
+            PORT: ${PORT:-3000}
             FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
             DB_HOST: db
             DB_PORT: 5432
             DB_USER: ${DB_USER:-postgres}
-            DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+            DB_PASSWORD: ${DB_PASSWORD:-postgres}
             DB_NAME: ${DB_NAME:-indigo_dyeing}
-            JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-            STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY is required}
+            JWT_SECRET: ${JWT_SECRET:-}
+            STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
             STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
         depends_on:
             db:
@@ -47,7 +51,7 @@ services:
             dockerfile: Dockerfile
             args:
                 VITE_API_URL: /api
-                VITE_STRIPE_PUBLIC_KEY: ${VITE_STRIPE_PUBLIC_KEY:?VITE_STRIPE_PUBLIC_KEY is required}
+                VITE_STRIPE_PUBLIC_KEY: ${VITE_STRIPE_PUBLIC_KEY:-}
         restart: unless-stopped
         ports:
             - "80:80"

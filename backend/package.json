@@ -8,9 +8,9 @@
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js",
-        "db:migrate": "knex migrate:latest",
-        "db:seed": "knex seed:run",
-        "db:rollback": "knex migrate:rollback",
+        "db:migrate": "knex migrate:latest --knexfile knexfile.cjs",
+        "db:seed": "knex seed:run --knexfile knexfile.cjs",
+        "db:rollback": "knex migrate:rollback --knexfile knexfile.cjs",
         "lint": "eslint src --ext ts"
     },
     "dependencies": {

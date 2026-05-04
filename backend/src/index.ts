@@ -20,16 +20,19 @@ const PORT = process.env.PORT || 3000;
 // Security headers
 app.use(helmet());
 
+// Trust the nginx reverse proxy so that rate limiting works by real client IP
+app.set("trust proxy", 1);
+
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100,
+    max: parseInt(process.env.RATE_LIMIT_MAX || "500"),
     standardHeaders: true,
     legacyHeaders: false,
 });
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || "200"),
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -47,8 +50,8 @@ app.use(
 app.use("/webhooks", express.raw({ type: "application/json" }), webhookRoutes);
 
 // Parse JSON for other routes
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 // Health check
 app.get("/health", (req: Request, res: Response) => {

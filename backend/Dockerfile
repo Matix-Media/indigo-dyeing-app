@@ -20,7 +20,10 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
+COPY knexfile.cjs ./knexfile.cjs
+COPY migrations ./migrations
+COPY seeds ./seeds
 
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "npx knex migrate:latest --knexfile knexfile.cjs --env production && npx knex seed:run --knexfile knexfile.cjs --env production && node dist/index.js"]

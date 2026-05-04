@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
 export interface AuthRequest extends Request {
     user?: {
         id: string;
@@ -17,7 +19,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as any;
+        const decoded = jwt.verify(token, JWT_SECRET) as any;
         req.user = decoded;
         next();
     } catch (error) {
@@ -30,7 +32,7 @@ export const optionalAuthMiddleware = (req: AuthRequest, res: Response, next: Ne
 
     if (token) {
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as any;
+            const decoded = jwt.verify(token, JWT_SECRET) as any;
             req.user = decoded;
         } catch (error) {
             // Silently fail, user will be undefined

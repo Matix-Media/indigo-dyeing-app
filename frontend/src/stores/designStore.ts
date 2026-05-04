@@ -52,8 +52,8 @@ export const useDesignStore = create<DesignState>((set, get) => ({
     createDesign: async (name: string, customization: DesignCustomization) => {
         set({ isLoading: true, error: null });
         try {
-            // Generate preview image
-            const imageUrl = await get().generatePreview(customization);
+            // Persist a compact placeholder path; DB column is varchar(255).
+            const imageUrl = `/design-previews/${customization.templateId}.png`;
 
             const newDesign = await apiClient.saveDesign({
                 name,

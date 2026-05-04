@@ -15,3 +15,4 @@ yarn-error.log*
 *.swo
 coverage/
 .nyc_output/
+e2e/test-results/*
